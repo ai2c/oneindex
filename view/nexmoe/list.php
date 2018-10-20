@@ -1,3 +1,13 @@
+<?php 
+    function isImage($filename){
+      $types = '(\.jpg$|\.png$|\.jpeg$)';
+      if(preg_match($types, trim($filename))){
+          return true;
+      }else{
+          return false;
+      }
+    }
+  ?>
 <?php view::layout('layout')?>
 <?php 
 function file_ico($item){
@@ -57,6 +67,13 @@ function file_ico($item){
     top: 180px;
 }
 </style>
+  <div class="mdui-typo">
+          <label class="mdui-switch">
+            看图模式
+            <input type="checkbox" id="image_view" <?php if ($_COOKIE["image_mode"] == "1") {echo "checked";} ?>>
+            <i class="mdui-switch-icon"></i>
+          </label>
+    </div>
 <div class="nexmoe-item">
 <div class="mdui-row">
 	<ul class="mdui-list">
@@ -94,12 +111,16 @@ function file_ico($item){
 			<?php else:?>
 		<li class="mdui-list-item file mdui-ripple">
 			<a href="<?php echo get_absolute_path($root.$path).rawurlencode($item['name']);?>" target="_blank">
-			  <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
+              <?php if(isImage($item['name']) and $_COOKIE["image_mode"] == "1"):?>
+			  <img class="mdui-img-fluid" src="<?php echo get_absolute_path($root.$path).rawurlencode($item['name']); ?>">
+              <?php else:?>
+              <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
 				<i class="mdui-icon material-icons"><?php echo file_ico($item);?></i>
 		    	<span><?php e($item['name']);?></span>
 			  </div>
 			  <div class="mdui-col-sm-3 mdui-text-right"><?php echo date("Y-m-d H:i:s", $item['lastModifiedDateTime']);?></div>
 			  <div class="mdui-col-sm-2 mdui-text-right"><?php echo onedrive::human_filesize($item['size']);?></div>
+              <?php endif;?>
 		  	</a>
 		</li>
 			<?php endif;?>
@@ -204,7 +225,29 @@ $(function(){
         $(this).attr("data-order", sort_order_to).text("expand_" + sort_order_to);
     });
 
+  	
+  
 });
+  
+   		var ckname='image_mode';
+  		function setCookie(key,value,day){
+            var date = new Date();
+            var nowDate = date.getDate();
+            date.setDate(nowDate + day);
+            var cookie = key+"="+value+"; expires="+date;
+            document.cookie = cookie;
+            return cookie;
+        }
+        $('#image_view').on('change', function () {
+           if($(this).prop('checked') == true){
+                setCookie(ckname,1,1);
+                window.location.href=window.location.href;
+           }else{
+                setCookie(ckname,0,1);
+                window.location.href=window.location.href;
+           }
+        });
+  
 </script>
 <a href="javascript:thumb();" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">format_list_bulleted</i></a>
 <?php view::end('content');?>
